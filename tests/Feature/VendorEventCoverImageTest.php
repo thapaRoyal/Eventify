@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Models\VendorKyc;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -17,6 +18,15 @@ class VendorEventCoverImageTest extends TestCase
             'role' => 'vendor',
         ]);
 
+        VendorKyc::create([
+            'user_id' => $vendor->id,
+            'business_name' => 'Test Events Ltd.',
+            'document_type' => 'citizenship',
+            'document_front' => 'kyc/test-front.jpg',
+            'status' => 'approved',
+            'approved_at' => now(),
+        ]);
+
         $this->actingAs($vendor)
             ->get('/vendor/events/create')
             ->assertOk()
@@ -24,6 +34,12 @@ class VendorEventCoverImageTest extends TestCase
             ->assertSee('Recommended format: JPG, JPEG, or PNG')
             ->assertSee('Adjust Event Cover')
             ->assertSee('Use Image')
+            ->assertSee('Create a new category...')
+            ->assertSee('id="category-modal"', false)
+            ->assertSee('Create a category')
+            ->assertSee('id="new-category-name"', false)
+            ->assertSee('Add Category')
+            ->assertDontSee('id="new-category-field"', false)
             ->assertSee('For best results, upload a landscape image suitable for the event card.');
     }
 }
